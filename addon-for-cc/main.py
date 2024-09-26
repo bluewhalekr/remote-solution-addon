@@ -62,8 +62,6 @@ async def get_states(session):
             if response.status == 200:
                 states = await response.json()
                 logger.info(f"Successfully fetched {len(states)} states")
-                logger.info(states)
-                logger.info(response.text)
                 return states
             logger.error(f"Failed to get states. Status: {response.status}")
     except Exception as e:
