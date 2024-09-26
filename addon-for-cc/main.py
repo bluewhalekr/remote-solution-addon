@@ -10,6 +10,7 @@ from loguru import logger
 HA_URL = os.environ.get("SUPERVISOR_URL", "http://supervisor/core")
 HA_WS_URL = HA_URL.replace("http", "ws", 1) + "/api/websocket"
 HA_TOKEN = os.environ.get("SUPERVISOR_TOKEN")
+logger.info(f"HA_TOKEN: {HA_TOKEN}")
 
 # 외부 서버 URL
 EXTERNAL_SERVER_URL = os.environ.get("EXTERNAL_SERVER_URL", "https://rs-command-crawler.azurewebsites.net")
@@ -24,9 +25,7 @@ if not ASSIST_TOKEN:
     raise ValueError("ASSIST_TOKEN is not set in options.json, please set it")
 
 if not HA_TOKEN:
-    HA_TOKEN = options.get("hass_token")
-    if not HA_TOKEN:
-        raise ValueError("HASS_TOKEN is not set in environment variables or options.json")
+    raise ValueError("HASS_TOKEN is not set in environment variables or options.json")
 
 # 폴링 간격 (초)
 POLLING_INTERVAL = options.get("polling_interval", 60)
