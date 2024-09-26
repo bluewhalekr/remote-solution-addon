@@ -6,7 +6,7 @@ from aiohttp import ClientSession
 from loguru import logger
 
 # Home Assistant 설정
-HA_URL = os.environ.get("HASS_URL", "http://supervisor/core")
+HA_URL = os.environ.get("HASS_URL", "http://localhost:8123")
 
 # 외부 서버 URL
 EXTERNAL_SERVER_URL = os.environ.get("EXTERNAL_SERVER_URL", "https://rs-command-crawler.azurewebsites.net")
