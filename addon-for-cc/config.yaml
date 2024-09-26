@@ -11,6 +11,7 @@ arch:
   - i386
 options:
   hass_token: ""
+  assist_token: ""
   external_server_url: "https://rs-command-crawler.azurewebsites.net"
   polling_interval: 60
   timeout: 30

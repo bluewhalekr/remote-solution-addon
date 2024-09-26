@@ -7,11 +7,14 @@ from loguru import logger
 
 # Home Assistant 설정
 HA_URL = os.environ.get("HASS_URL", "http://supervisor/core")
+
 HA_TOKEN = os.environ.get("HASS_TOKEN")
+ASSIST_TOKEN = os.environ.get("ASSIST_TOKEN")
+if not ASSIST_TOKEN:
+    raise ValueError("ASSIST_TOKEN is not set in environment variables. Check the documentation for more information.")
 
 # 외부 서버 URL
 EXTERNAL_SERVER_URL = os.environ.get("EXTERNAL_SERVER_URL", "https://rs-command-crawler.azurewebsites.net")
-
 SYSTEM_MAC_ADDRESS = get_mac_address()
 
 # 설정 파일에서 옵션 로드
@@ -48,9 +51,10 @@ async def get_states(session):
 
 async def send_to_external_server(session, data_list):
     try:
+        headers = {"x-functions-key": ASSIST_TOKEN}
         payload = {"macAddress": SYSTEM_MAC_ADDRESS, "states": data_list}
 
-        async with session.post(EXTERNAL_SERVER_URL, json=payload, timeout=TIMEOUT) as response:
+        async with session.post(EXTERNAL_SERVER_URL, headers=headers, json=payload, timeout=TIMEOUT) as response:
             if response.status == 200:
                 logger.info(f"Data sent successfully for {len(data_list)} entities")
             else:
