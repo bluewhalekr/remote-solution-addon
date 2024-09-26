@@ -7,11 +7,7 @@ from loguru import logger
 
 # Home Assistant 설정
 HA_URL = os.environ.get("HASS_URL", "http://supervisor/core")
-
 HA_TOKEN = os.environ.get("HASS_TOKEN")
-ASSIST_TOKEN = os.environ.get("ASSIST_TOKEN")
-if not ASSIST_TOKEN:
-    raise ValueError("ASSIST_TOKEN is not set in environment variables. Check the documentation for more information.")
 
 # 외부 서버 URL
 EXTERNAL_SERVER_URL = os.environ.get("EXTERNAL_SERVER_URL", "https://rs-command-crawler.azurewebsites.net")
@@ -21,7 +17,10 @@ SYSTEM_MAC_ADDRESS = get_mac_address()
 with open("/data/options.json", encoding="utf8") as f:
     options = json.load(f)
 
-# 설정값 로드
+ASSIST_TOKEN = options.get("assist_token")
+if not ASSIST_TOKEN:
+    raise ValueError("ASSIST_TOKEN is not set in options.json, please set it")
+
 if not HA_TOKEN:
     HA_TOKEN = options.get("hass_token")
     if not HA_TOKEN:
