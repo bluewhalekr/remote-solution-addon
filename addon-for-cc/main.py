@@ -7,10 +7,8 @@ from aiohttp import ClientSession
 from loguru import logger
 
 # Home Assistant 설정
-HA_URL = os.environ.get("SUPERVISOR_URL", "http://supervisor/core")
-HA_WS_URL = HA_URL.replace("http", "ws", 1) + "/api/websocket"
+HA_URL = "http://supervisor/core/api"
 HA_TOKEN = os.environ.get("SUPERVISOR_TOKEN")
-logger.info(f"HA_TOKEN: {HA_TOKEN}")
 
 # 외부 서버 URL
 EXTERNAL_SERVER_URL = os.environ.get("EXTERNAL_SERVER_URL", "https://rs-command-crawler.azurewebsites.net")
@@ -25,17 +23,16 @@ if not ASSIST_TOKEN:
     raise ValueError("ASSIST_TOKEN is not set in options.json, please set it")
 
 if not HA_TOKEN:
-    raise ValueError("HASS_TOKEN is not set in environment variables or options.json")
+    raise ValueError("SUPERVISOR_TOKEN is not set in environment variables")
 
 # 폴링 간격 (초)
 POLLING_INTERVAL = options.get("polling_interval", 60)
-
 # 타임아웃 설정 (초)
 TIMEOUT = options.get("timeout", 30)
 
 
-async def get_all_states(session):
-    url = f"{HA_URL}/api/states"
+async def get_states(session):
+    url = f"{HA_URL}/states"
     headers = {
         "Authorization": f"Bearer {HA_TOKEN}",
         "Content-Type": "application/json",
@@ -64,41 +61,32 @@ async def send_to_external_server(session, data_list):
         logger.error(f"Error sending data: {str(e)}")
 
 
-async def listen_for_changes(session):
-    async with session.ws_connect(HA_WS_URL) as ws:
-        await ws.send_json({"type": "auth", "access_token": HA_TOKEN})
-        auth_response = await ws.receive_json()
-        if auth_response["type"] != "auth_ok":
-            logger.error("Authentication failed")
-            return
-
-        # 처음 실행 시 모든 상태 전송
-        all_states = await get_all_states(session)
-        if all_states:
-            await send_to_external_server(session, all_states)
-
-        await ws.send_json({"id": 1, "type": "subscribe_events", "event_type": "state_changed"})
-        async for msg in ws:
-            if msg.type == aiohttp.WSMsgType.TEXT:
-                data = json.loads(msg.data)
-                if data["type"] == "event" and data["event"]["event_type"] == "state_changed":
-                    new_state = data["event"]["data"]["new_state"]
-                    if new_state:
-                        await send_to_external_server(session, [new_state])
-            elif msg.type == aiohttp.WSMsgType.ERROR:
-                logger.error(f"WebSocket connection closed with exception {ws.exception()}")
-                break
-
-
 async def main():
-    while True:
-        try:
-            async with ClientSession() as session:
-                await listen_for_changes(session)
-        except Exception as e:
-            logger.error(f"Connection error: {str(e)}")
-            logger.info("Reconnecting in 10 seconds...")
-            await asyncio.sleep(10)
+    previous_states = {}
+    first_run = True
+
+    async with ClientSession() as session:
+        while True:
+            try:
+                current_states = await get_states(session)
+                if current_states:
+                    changed_states = []
+
+                    for state in current_states:
+                        entity_id = state["entity_id"]
+                        if first_run or entity_id not in previous_states or state != previous_states[entity_id]:
+                            changed_states.append(state)
+                            previous_states[entity_id] = state
+
+                    if changed_states:
+                        await send_to_external_server(session, changed_states)
+
+                    first_run = False
+
+                await asyncio.sleep(POLLING_INTERVAL)
+            except Exception as e:
+                logger.error(f"Error occurred: {str(e)}")
+                await asyncio.sleep(POLLING_INTERVAL)
 
 
 if __name__ == "__main__":
