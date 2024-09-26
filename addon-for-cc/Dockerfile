@@ -6,7 +6,8 @@ RUN apk add --no-cache gcc musl-dev
 RUN pip install requests \
                 paho-mqtt \
                 aiohttp \
-                getmac
+                getmac \
+                loguru
 
 COPY . .
 

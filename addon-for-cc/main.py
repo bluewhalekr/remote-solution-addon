@@ -3,6 +3,7 @@ import json
 import os
 from getmac import get_mac_address
 from aiohttp import ClientSession
+from loguru import logger
 
 # Home Assistant 설정
 HA_URL = os.environ.get("HASS_URL", "http://supervisor/core")
@@ -14,7 +15,7 @@ EXTERNAL_SERVER_URL = os.environ.get("EXTERNAL_SERVER_URL", "https://rs-command-
 SYSTEM_MAC_ADDRESS = get_mac_address()
 
 # 설정 파일에서 옵션 로드
-with open("/data/options.json") as f:
+with open("/data/options.json", encoding="utf8") as f:
     options = json.load(f)
 
 # 설정값 로드
@@ -37,10 +38,11 @@ async def get_states(session):
         "Content-Type": "application/json",
     }
     async with session.get(url, headers=headers, timeout=TIMEOUT) as response:
+        logger.info(f"get_states: {response.status}")
         if response.status == 200:
             return await response.json()
         else:
-            print(f"Failed to get states. Status: {response.status}")
+            logger.info(f"Failed to get states. Status: {response.status}")
             return None
 
 
@@ -50,13 +52,13 @@ async def send_to_external_server(session, data_list):
 
         async with session.post(EXTERNAL_SERVER_URL, json=payload, timeout=TIMEOUT) as response:
             if response.status == 200:
-                print(f"Data sent successfully for {len(data_list)} entities")
+                logger.info(f"Data sent successfully for {len(data_list)} entities")
             else:
-                print(f"Failed to send data. Status: {response.status}")
+                logger.info(f"Failed to send data. Status: {response.status}")
     except asyncio.TimeoutError:
-        print("Timeout while sending data")
+        logger.error("Timeout while sending data")
     except Exception as e:
-        print(f"Error sending data: {str(e)}")
+        logger.error(f"Error sending data: {str(e)}")
 
 
 async def main():
@@ -76,13 +78,13 @@ async def main():
 
                 if changed_states:
                     await send_to_external_server(session, changed_states)
-
                 await asyncio.sleep(POLLING_INTERVAL)
-            except Exception as e:
-                print(f"Error occurred: {str(e)}")
+                logger.info(f"macAddress: {SYSTEM_MAC_ADDRESS}, States: {len(changed_states)}")
+            except Exception as e:  # pylint: disable=broad-except
+                logger.error(f"Error occurred: {str(e)}")
                 await asyncio.sleep(POLLING_INTERVAL)
 
 
 if __name__ == "__main__":
-    print(f"System MAC Address: {SYSTEM_MAC_ADDRESS}")
+    logger.info(f"System MAC Address: {SYSTEM_MAC_ADDRESS}")
     asyncio.run(main())
