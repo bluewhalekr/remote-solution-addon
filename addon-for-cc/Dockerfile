@@ -5,8 +5,9 @@ WORKDIR /app
 # 필요한 패키지 설치
 RUN apk add --no-cache gcc musl-dev
 RUN pip install requests \
-                ]paho-mqtt \
-                aiohttp
+                paho-mqtt \
+                aiohttp \
+                getmac
 
 # 애플리케이션 파일 복사
 COPY app/ .

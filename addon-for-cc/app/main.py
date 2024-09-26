@@ -1,7 +1,7 @@
 import asyncio
 import json
 import os
-import aiohttp
+from getmac import get_mac_address
 from aiohttp import ClientSession, ClientTimeout
 
 # Home Assistant 설정
@@ -10,6 +10,8 @@ HA_TOKEN = os.environ.get("HASS_TOKEN")
 
 # 외부 서버 URL
 EXTERNAL_SERVER_URL = os.environ.get("EXTERNAL_SERVER_URL", "https://rs-command-crawler.azurewebsites.net")
+
+SYSTEM_MAC_ADDRESS = get_mac_address()
 
 # 설정 파일에서 옵션 로드
 with open("/data/options.json") as f:
@@ -44,6 +46,7 @@ async def get_states(session):
 
 async def send_to_external_server(session, data):
     try:
+        data.update({"mac_address": SYSTEM_MAC_ADDRESS})
         async with session.post(EXTERNAL_SERVER_URL, json=data, timeout=TIMEOUT) as response:
             if response.status == 200:
                 print(f"Data sent successfully: {data['entity_id']}")
