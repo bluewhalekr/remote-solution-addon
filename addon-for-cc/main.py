@@ -53,7 +53,9 @@ async def send_to_external_server(session, data_list):
         headers = {"x-functions-key": ASSIST_TOKEN}
         payload = {"macAddress": SYSTEM_MAC_ADDRESS, "states": data_list}
 
-        async with session.post(EXTERNAL_SERVER_URL, headers=headers, json=payload, timeout=TIMEOUT) as response:
+        async with session.post(
+            f"{EXTERNAL_SERVER_URL}/api/v1/command-crawler", headers=headers, json=payload, timeout=TIMEOUT
+        ) as response:
             if response.status == 200:
                 logger.info(f"Data sent successfully for {len(data_list)} entities")
             else:
