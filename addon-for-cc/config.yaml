@@ -1,6 +1,6 @@
 name: "CommandCrawlerAssist Addon"
 description: "Sends Home Assistant states to CommandCrawler"
-version: "0.1.9"
+version: "0.1.10"
 slug: "commandcrawler_assist"
 init: false
 arch:
