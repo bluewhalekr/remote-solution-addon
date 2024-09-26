@@ -44,18 +44,19 @@ async def get_states(session):
             return None
 
 
-async def send_to_external_server(session, data):
+async def send_to_external_server(session, data_list):
     try:
-        data.update({"mac_address": SYSTEM_MAC_ADDRESS})
-        async with session.post(EXTERNAL_SERVER_URL, json=data, timeout=TIMEOUT) as response:
+        payload = {"macAddress": SYSTEM_MAC_ADDRESS, "states": data_list}
+
+        async with session.post(EXTERNAL_SERVER_URL, json=payload, timeout=TIMEOUT) as response:
             if response.status == 200:
-                print(f"Data sent successfully: {data['entity_id']}")
+                print(f"Data sent successfully for {len(data_list)} entities")
             else:
-                print(f"Failed to send data: {data['entity_id']}, Status: {response.status}")
+                print(f"Failed to send data. Status: {response.status}")
     except asyncio.TimeoutError:
-        print(f"Timeout while sending data: {data['entity_id']}")
+        print("Timeout while sending data")
     except Exception as e:
-        print(f"Error sending data: {data['entity_id']}, Error: {str(e)}")
+        print(f"Error sending data: {str(e)}")
 
 
 async def main():
@@ -64,12 +65,17 @@ async def main():
         while True:
             try:
                 current_states = await get_states(session)
+                changed_states = []
+
                 if current_states:
                     for state in current_states:
                         entity_id = state["entity_id"]
                         if entity_id not in previous_states or state != previous_states[entity_id]:
-                            await send_to_external_server(session, state)
+                            changed_states.append(state)
                             previous_states[entity_id] = state
+
+                if changed_states:
+                    await send_to_external_server(session, changed_states)
 
                 await asyncio.sleep(POLLING_INTERVAL)
             except Exception as e:
@@ -78,4 +84,5 @@ async def main():
 
 
 if __name__ == "__main__":
+    print(f"System MAC Address: {SYSTEM_MAC_ADDRESS}")
     asyncio.run(main())
