@@ -70,9 +70,26 @@ async def get_states(session):
     return None
 
 
+async def get_services(session):
+    url = f"{HA_URL}/services"
+    headers = {"Authorization": f"Bearer {HA_TOKEN}", "Content-Type": "application/json"}
+
+    try:
+        async with session.get(url, headers=headers, timeout=TIMEOUT) as response:
+            if response.status == 200:
+                states = await response.json()
+                logger.info(f"Successfully fetched {len(states)} states")
+                return states
+            logger.error(f"Failed to get states. Status: {response.status}")
+    except Exception as e:
+        logger.exception(f"Error fetching states: {str(e)}")
+
+    return None
+
+
 async def send_initial_states(session, states):
     logger.info("First run detected. Sending all states.")
-    await send_to_external_server(session, states)
+    await send_states_to_external_server(session, states)
 
 
 def get_changed_states(current_states, previous_states):
@@ -85,7 +102,7 @@ def get_changed_states(current_states, previous_states):
 
 async def send_changed_states(session, changed_states):
     logger.info(f"Sending {len(changed_states)} changed states")
-    await send_to_external_server(session, changed_states)
+    await send_states_to_external_server(session, changed_states)
 
 
 def update_previous_states(previous_states, current_states):
@@ -94,9 +111,28 @@ def update_previous_states(previous_states, current_states):
     return previous_states
 
 
-async def send_to_external_server(session, data_list):
+async def send_states_to_external_server(session, data_list):
     headers = {"x-functions-key": ASSIST_TOKEN, "Content-Type": "application/json"}
     payload = {"macAddress": SYSTEM_MAC_ADDRESS, "states": data_list}
+    url = f"{EXTERNAL_SERVER_URL}/api/v1/command-crawler"
+
+    try:
+        async with session.post(url, headers=headers, data=json.dumps(payload), timeout=TIMEOUT) as response:
+            if response.status == 200:
+                logger.info(f"Data sent successfully for {len(data_list)} entities")
+            else:
+                logger.error(f"Failed to send data. Status: {response.status}")
+                response_text = await response.text()
+                logger.error(f"Response: {response_text}")
+    except asyncio.TimeoutError:
+        logger.error("Timeout while sending data to external server")
+    except Exception as e:
+        logger.exception(f"Error sending data: {str(e)}")
+
+
+async def send_services_to_external_server(session, data_list):
+    headers = {"x-functions-key": ASSIST_TOKEN, "Content-Type": "application/json"}
+    payload = {"macAddress": SYSTEM_MAC_ADDRESS, "services": data_list}
     url = f"{EXTERNAL_SERVER_URL}/api/v1/command-crawler"
 
     try:
@@ -117,6 +153,7 @@ async def main():
     previous_states = {}
     async with aiohttp.ClientSession() as session:
         logger.info("Starting main loop")
+        await send_services_to_external_server(session, await get_services(session))
         while True:
             previous_states = await fetch_and_send_states(session, previous_states)
             logger.debug(f"Sleeping for {POLLING_INTERVAL} seconds")
