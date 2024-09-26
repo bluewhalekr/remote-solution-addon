@@ -2,7 +2,7 @@ import asyncio
 import json
 import os
 from getmac import get_mac_address
-from aiohttp import ClientSession, ClientTimeout
+from aiohttp import ClientSession
 
 # Home Assistant 설정
 HA_URL = os.environ.get("HASS_URL", "http://supervisor/core")

@@ -1,7 +1,7 @@
 name: "CommandCrawlerSupporter Addon"
 description: "Sends Home Assistant states to CommandCrawler"
 version: "0.1"
-slug: "aimmo_commandcrawler_supporter"
+slug: "commandcrawler_supporter"
 init: false
 arch:
   - aarch64
