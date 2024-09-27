@@ -7,7 +7,7 @@ from aiohttp import ClientSession
 from loguru import logger
 
 # Home Assistant 설정
-HA_URL = "http://supervisor/core/api"
+HA_URL = "http://homeassistant:8123/api"
 HA_TOKEN = os.environ.get("SUPERVISOR_TOKEN")
 
 # 외부 서버 URL
@@ -23,7 +23,8 @@ if not ASSIST_TOKEN:
     raise ValueError("ASSIST_TOKEN is not set in options.json, please set it")
 
 if not HA_TOKEN:
-    raise ValueError("SUPERVISOR_TOKEN is not set in environment variables")
+    HA_TOKEN = options.get("haas_token")
+    raise ValueError("HA_TOKEN is not set in environment variables")
 
 # 폴링 간격 (초)
 POLLING_INTERVAL = options.get("polling_interval", 60)
