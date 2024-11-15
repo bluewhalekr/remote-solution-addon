@@ -7,7 +7,7 @@ from aiohttp import ClientSession
 from loguru import logger
 
 # Home Assistant 설정
-HA_URL = "https://aimmo.rs-aiot.com"
+HA_URL = "homeassistant"
 HA_TOKEN = os.environ.get("SUPERVISOR_TOKEN")
 
 # 외부 서버 URL
@@ -55,7 +55,7 @@ async def fetch_and_send_states(session, previous_states):
 
 
 async def get_states(session):
-    url = f"{HA_URL}/states"
+    url = f"{HA_URL}/api/states"
     headers = {"Authorization": f"Bearer {HA_TOKEN}", "Content-Type": "application/json"}
 
     try:
