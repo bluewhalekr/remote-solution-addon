@@ -82,7 +82,7 @@
         "kind": 5,
         "importPath": "addon-for-cc.main",
         "description": "addon-for-cc.main",
-        "peekOfCode": "HA_URL = \"homeassistant\"\nHA_TOKEN = os.environ.get(\"SUPERVISOR_TOKEN\")\n# 외부 서버 URL\nEXTERNAL_SERVER_URL = os.environ.get(\"EXTERNAL_SERVER_URL\", \"https://rs-command-crawler.azurewebsites.net\")\nSYSTEM_MAC_ADDRESS = get_mac_address()\n# 설정 파일에서 옵션 로드\nwith open(\"/data/options.json\", encoding=\"utf8\") as f:\n    options = json.load(f)\nASSIST_TOKEN = options.get(\"assist_token\")\nif not ASSIST_TOKEN:",
+        "peekOfCode": "HA_URL = \"http://homeassistant\"\nHA_TOKEN = os.environ.get(\"SUPERVISOR_TOKEN\")\n# 외부 서버 URL\nEXTERNAL_SERVER_URL = os.environ.get(\"EXTERNAL_SERVER_URL\", \"https://rs-command-crawler.azurewebsites.net\")\nSYSTEM_MAC_ADDRESS = get_mac_address()\n# 설정 파일에서 옵션 로드\nwith open(\"/data/options.json\", encoding=\"utf8\") as f:\n    options = json.load(f)\nASSIST_TOKEN = options.get(\"assist_token\")\nif not ASSIST_TOKEN:",
         "detail": "addon-for-cc.main",
         "documentation": {}
     },

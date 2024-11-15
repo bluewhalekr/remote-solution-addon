@@ -7,7 +7,7 @@ from aiohttp import ClientSession
 from loguru import logger
 
 # Home Assistant 설정
-HA_URL = "homeassistant"
+HA_URL = "http://homeassistant"
 HA_TOKEN = os.environ.get("SUPERVISOR_TOKEN")
 
 # 외부 서버 URL
