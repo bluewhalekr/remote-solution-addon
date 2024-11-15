@@ -1,8 +1,10 @@
-FROM python:3.9-alpine
+FROM python:3.9
+
+RUN apt-get update
 
 WORKDIR /app
 
-RUN apk add --no-cache gcc musl-dev
+#RUN apk add --no-cache gcc musl-dev
 RUN pip install requests \
                 paho-mqtt \
                 aiohttp \

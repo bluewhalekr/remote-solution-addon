@@ -1,0 +1,143 @@
+[
+    {
+        "label": "asyncio",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "asyncio",
+        "description": "asyncio",
+        "detail": "asyncio",
+        "documentation": {}
+    },
+    {
+        "label": "json",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "json",
+        "description": "json",
+        "detail": "json",
+        "documentation": {}
+    },
+    {
+        "label": "os",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "os",
+        "description": "os",
+        "detail": "os",
+        "documentation": {}
+    },
+    {
+        "label": "aiohttp",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "aiohttp",
+        "description": "aiohttp",
+        "detail": "aiohttp",
+        "documentation": {}
+    },
+    {
+        "label": "ClientSession",
+        "importPath": "aiohttp",
+        "description": "aiohttp",
+        "isExtraImport": true,
+        "detail": "aiohttp",
+        "documentation": {}
+    },
+    {
+        "label": "get_mac_address",
+        "importPath": "getmac",
+        "description": "getmac",
+        "isExtraImport": true,
+        "detail": "getmac",
+        "documentation": {}
+    },
+    {
+        "label": "logger",
+        "importPath": "loguru",
+        "description": "loguru",
+        "isExtraImport": true,
+        "detail": "loguru",
+        "documentation": {}
+    },
+    {
+        "label": "get_changed_states",
+        "kind": 2,
+        "importPath": "addon-for-cc.main",
+        "description": "addon-for-cc.main",
+        "peekOfCode": "def get_changed_states(current_states, previous_states):\n    return [\n        state\n        for state in current_states\n        if state[\"entity_id\"] not in previous_states or state != previous_states[state[\"entity_id\"]]\n    ]\nasync def send_changed_states(session, changed_states):\n    logger.info(f\"Sending {len(changed_states)} changed states\")\n    await send_states_to_external_server(session, changed_states)\ndef update_previous_states(previous_states, current_states):",
+        "detail": "addon-for-cc.main",
+        "documentation": {}
+    },
+    {
+        "label": "update_previous_states",
+        "kind": 2,
+        "importPath": "addon-for-cc.main",
+        "description": "addon-for-cc.main",
+        "peekOfCode": "def update_previous_states(previous_states, current_states):\n    for state in current_states:\n        previous_states[state[\"entity_id\"]] = state\n    return previous_states\nasync def send_states_to_external_server(session, data_list):\n    headers = {\"x-functions-key\": ASSIST_TOKEN, \"Content-Type\": \"application/json\"}\n    payload = {\"macAddress\": SYSTEM_MAC_ADDRESS, \"states\": data_list}\n    url = f\"{EXTERNAL_SERVER_URL}/api/v1/command-crawler\"\n    try:\n        async with session.post(url, headers=headers, data=json.dumps(payload), timeout=TIMEOUT) as response:",
+        "detail": "addon-for-cc.main",
+        "documentation": {}
+    },
+    {
+        "label": "HA_URL",
+        "kind": 5,
+        "importPath": "addon-for-cc.main",
+        "description": "addon-for-cc.main",
+        "peekOfCode": "HA_URL = \"https://aimmo.rs-aiot.com\"\nHA_TOKEN = os.environ.get(\"SUPERVISOR_TOKEN\")\n# 외부 서버 URL\nEXTERNAL_SERVER_URL = os.environ.get(\"EXTERNAL_SERVER_URL\", \"https://rs-command-crawler.azurewebsites.net\")\nSYSTEM_MAC_ADDRESS = get_mac_address()\n# 설정 파일에서 옵션 로드\nwith open(\"/data/options.json\", encoding=\"utf8\") as f:\n    options = json.load(f)\nASSIST_TOKEN = options.get(\"assist_token\")\nif not ASSIST_TOKEN:",
+        "detail": "addon-for-cc.main",
+        "documentation": {}
+    },
+    {
+        "label": "HA_TOKEN",
+        "kind": 5,
+        "importPath": "addon-for-cc.main",
+        "description": "addon-for-cc.main",
+        "peekOfCode": "HA_TOKEN = os.environ.get(\"SUPERVISOR_TOKEN\")\n# 외부 서버 URL\nEXTERNAL_SERVER_URL = os.environ.get(\"EXTERNAL_SERVER_URL\", \"https://rs-command-crawler.azurewebsites.net\")\nSYSTEM_MAC_ADDRESS = get_mac_address()\n# 설정 파일에서 옵션 로드\nwith open(\"/data/options.json\", encoding=\"utf8\") as f:\n    options = json.load(f)\nASSIST_TOKEN = options.get(\"assist_token\")\nif not ASSIST_TOKEN:\n    raise ValueError(\"ASSIST_TOKEN is not set in options.json, please set it\")",
+        "detail": "addon-for-cc.main",
+        "documentation": {}
+    },
+    {
+        "label": "EXTERNAL_SERVER_URL",
+        "kind": 5,
+        "importPath": "addon-for-cc.main",
+        "description": "addon-for-cc.main",
+        "peekOfCode": "EXTERNAL_SERVER_URL = os.environ.get(\"EXTERNAL_SERVER_URL\", \"https://rs-command-crawler.azurewebsites.net\")\nSYSTEM_MAC_ADDRESS = get_mac_address()\n# 설정 파일에서 옵션 로드\nwith open(\"/data/options.json\", encoding=\"utf8\") as f:\n    options = json.load(f)\nASSIST_TOKEN = options.get(\"assist_token\")\nif not ASSIST_TOKEN:\n    raise ValueError(\"ASSIST_TOKEN is not set in options.json, please set it\")\nif not HA_TOKEN:\n    HA_TOKEN = options.get(\"haas_token\")",
+        "detail": "addon-for-cc.main",
+        "documentation": {}
+    },
+    {
+        "label": "SYSTEM_MAC_ADDRESS",
+        "kind": 5,
+        "importPath": "addon-for-cc.main",
+        "description": "addon-for-cc.main",
+        "peekOfCode": "SYSTEM_MAC_ADDRESS = get_mac_address()\n# 설정 파일에서 옵션 로드\nwith open(\"/data/options.json\", encoding=\"utf8\") as f:\n    options = json.load(f)\nASSIST_TOKEN = options.get(\"assist_token\")\nif not ASSIST_TOKEN:\n    raise ValueError(\"ASSIST_TOKEN is not set in options.json, please set it\")\nif not HA_TOKEN:\n    HA_TOKEN = options.get(\"haas_token\")\n    raise ValueError(\"HA_TOKEN is not set in environment variables\")",
+        "detail": "addon-for-cc.main",
+        "documentation": {}
+    },
+    {
+        "label": "ASSIST_TOKEN",
+        "kind": 5,
+        "importPath": "addon-for-cc.main",
+        "description": "addon-for-cc.main",
+        "peekOfCode": "ASSIST_TOKEN = options.get(\"assist_token\")\nif not ASSIST_TOKEN:\n    raise ValueError(\"ASSIST_TOKEN is not set in options.json, please set it\")\nif not HA_TOKEN:\n    HA_TOKEN = options.get(\"haas_token\")\n    raise ValueError(\"HA_TOKEN is not set in environment variables\")\n# 폴링 간격 (초)\nPOLLING_INTERVAL = options.get(\"polling_interval\", 60)\n# 타임아웃 설정 (초)\nTIMEOUT = options.get(\"timeout\", 30)",
+        "detail": "addon-for-cc.main",
+        "documentation": {}
+    },
+    {
+        "label": "POLLING_INTERVAL",
+        "kind": 5,
+        "importPath": "addon-for-cc.main",
+        "description": "addon-for-cc.main",
+        "peekOfCode": "POLLING_INTERVAL = options.get(\"polling_interval\", 60)\n# 타임아웃 설정 (초)\nTIMEOUT = options.get(\"timeout\", 30)\nasync def fetch_and_send_states(session, previous_states):\n    try:\n        current_states = await get_states(session)\n        if not current_states:\n            logger.warning(\"Failed to fetch states\")\n            return previous_states\n        if not previous_states:",
+        "detail": "addon-for-cc.main",
+        "documentation": {}
+    },
+    {
+        "label": "TIMEOUT",
+        "kind": 5,
+        "importPath": "addon-for-cc.main",
+        "description": "addon-for-cc.main",
+        "peekOfCode": "TIMEOUT = options.get(\"timeout\", 30)\nasync def fetch_and_send_states(session, previous_states):\n    try:\n        current_states = await get_states(session)\n        if not current_states:\n            logger.warning(\"Failed to fetch states\")\n            return previous_states\n        if not previous_states:\n            await send_initial_states(session, current_states)\n            return {state[\"entity_id\"]: state for state in current_states}",
+        "detail": "addon-for-cc.main",
+        "documentation": {}
+    }
+]

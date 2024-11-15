@@ -7,7 +7,7 @@ from aiohttp import ClientSession
 from loguru import logger
 
 # Home Assistant 설정
-HA_URL = "192.168.9.170:8123/api"
+HA_URL = "https://aimmo.rs-aiot.com"
 HA_TOKEN = os.environ.get("SUPERVISOR_TOKEN")
 
 # 외부 서버 URL
