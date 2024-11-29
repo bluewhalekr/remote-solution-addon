@@ -1,11 +1,11 @@
 name: "CommandCrawlerAssist Addon"
 description: "Sends Home Assistant states to CommandCrawler"
-version: "0.1.35"
+version: "0.1.36"
 slug: "commandcrawler_assist"
 homeassistant_api: true
-#hassio_api: true
+supervisor_api: true
 #hassio_role: homeassistant
-#network: host
+host_network: true
 full_access: true
 privileged:
   - SYS_ADMIN
