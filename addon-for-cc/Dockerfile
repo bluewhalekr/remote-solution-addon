@@ -8,7 +8,7 @@ WORKDIR /app
 RUN pip install requests \
                 paho-mqtt \
                 aiohttp \
-                getmac \
+                netifaces \
                 loguru
 
 COPY . .

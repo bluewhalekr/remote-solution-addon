@@ -2,17 +2,15 @@ import asyncio
 import json
 import os
 import aiohttp
-from getmac import get_mac_address
-from aiohttp import ClientSession
+import netifaces
 from loguru import logger
 
 # Home Assistant 설정
 HA_URL = "http://supervisor/core"
 HA_TOKEN = os.environ.get("SUPERVISOR_TOKEN")
-
 # 외부 서버 URL
 EXTERNAL_SERVER_URL = os.environ.get("EXTERNAL_SERVER_URL", "https://rs-command-crawler.azurewebsites.net")
-SYSTEM_MAC_ADDRESS = get_mac_address()
+SYSTEM_MAC_ADDRESS = netifaces.ifaddresses("end0")[netifaces.AF_PACKET][0]["addr"]
 
 # 설정 파일에서 옵션 로드
 with open("/data/options.json", encoding="utf8") as f:

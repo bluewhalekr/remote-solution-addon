@@ -1,3 +1,2 @@
-## 0.1.x 
-- update for poc 
-- remote supervisor
+## 0.1.27
+- fixed host mac address
