@@ -28,7 +28,7 @@ if not HA_TOKEN:
     raise ValueError("HA_TOKEN is not set in environment variables")
 
 # 폴링 간격 (초)
-POLLING_INTERVAL = options.get("polling_interval", 5)
+POLLING_INTERVAL = options.get("polling_interval", 60)
 # 타임아웃 설정 (초)
 TIMEOUT = options.get("timeout", 30)
 

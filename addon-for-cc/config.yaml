@@ -1,6 +1,6 @@
 name: "CommandCrawlerAssist Addon"
 description: "Sends Home Assistant states to CommandCrawler"
-version: "0.1.37"
+version: "0.1.38"
 slug: "commandcrawler_assist"
 homeassistant_api: true
 supervisor_api: true
@@ -20,7 +20,7 @@ arch:
 options:
   assist_token: ""
   external_server_url: "https://rs-command-crawler.azurewebsites.net"
-  polling_interval: 60
+  polling_interval: 10 
   timeout: 30
 schema:
   assist_token: str
