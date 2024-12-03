@@ -1,6 +1,7 @@
 import asyncio
 import json
 import os
+
 import aiohttp
 import netifaces
 from loguru import logger
@@ -9,7 +10,9 @@ from loguru import logger
 HA_URL = "http://supervisor/core"
 HA_TOKEN = os.environ.get("SUPERVISOR_TOKEN")
 # 외부 서버 URL
-EXTERNAL_SERVER_URL = os.environ.get("EXTERNAL_SERVER_URL", "https://rs-command-crawler.azurewebsites.net")
+EXTERNAL_SERVER_URL = os.environ.get(
+    "EXTERNAL_SERVER_URL", "https://rs-command-crawler.azurewebsites.net"
+)
 SYSTEM_MAC_ADDRESS = netifaces.ifaddresses("end0")[netifaces.AF_PACKET][0]["addr"]
 
 # 설정 파일에서 옵션 로드
@@ -25,7 +28,7 @@ if not HA_TOKEN:
     raise ValueError("HA_TOKEN is not set in environment variables")
 
 # 폴링 간격 (초)
-POLLING_INTERVAL = options.get("polling_interval", 60)
+POLLING_INTERVAL = options.get("polling_interval", 5)
 # 타임아웃 설정 (초)
 TIMEOUT = options.get("timeout", 30)
 
@@ -54,7 +57,10 @@ async def fetch_and_send_states(session, previous_states):
 
 async def get_states(session):
     url = f"{HA_URL}/api/states"
-    headers = {"Authorization": f"Bearer {HA_TOKEN}", "Content-Type": "application/json"}
+    headers = {
+        "Authorization": f"Bearer {HA_TOKEN}",
+        "Content-Type": "application/json",
+    }
 
     try:
         async with session.get(url, headers=headers, timeout=TIMEOUT) as response:
@@ -71,7 +77,10 @@ async def get_states(session):
 
 async def get_services(session):
     url = f"{HA_URL}/api/services"
-    headers = {"Authorization": f"Bearer {HA_TOKEN}", "Content-Type": "application/json"}
+    headers = {
+        "Authorization": f"Bearer {HA_TOKEN}",
+        "Content-Type": "application/json",
+    }
 
     try:
         async with session.get(url, headers=headers, timeout=TIMEOUT) as response:
@@ -95,7 +104,8 @@ def get_changed_states(current_states, previous_states):
     return [
         state
         for state in current_states
-        if state["entity_id"] not in previous_states or state != previous_states[state["entity_id"]]
+        if state["entity_id"] not in previous_states
+        or state != previous_states[state["entity_id"]]
     ]
 
 
@@ -116,7 +126,9 @@ async def send_states_to_external_server(session, data_list):
     url = f"{EXTERNAL_SERVER_URL}/api/v1/command-crawler"
 
     try:
-        async with session.post(url, headers=headers, data=json.dumps(payload), timeout=TIMEOUT) as response:
+        async with session.post(
+            url, headers=headers, data=json.dumps(payload), timeout=TIMEOUT
+        ) as response:
             if response.status == 200:
                 logger.info(f"Data sent successfully for {len(data_list)} entities")
             else:
@@ -135,7 +147,9 @@ async def send_services_to_external_server(session, data_list):
     url = f"{EXTERNAL_SERVER_URL}/api/v1/command-crawler"
 
     try:
-        async with session.post(url, headers=headers, data=json.dumps(payload), timeout=TIMEOUT) as response:
+        async with session.post(
+            url, headers=headers, data=json.dumps(payload), timeout=TIMEOUT
+        ) as response:
             if response.status == 200:
                 logger.info(f"Data sent successfully for {len(data_list)} entities")
             else:
