@@ -1,6 +1,6 @@
 name: "CommandCrawlerAssist Addon"
 description: "Sends Home Assistant states to CommandCrawler"
-version: "0.1.38"
+version: "0.1.39"
 slug: "commandcrawler_assist"
 homeassistant_api: true
 supervisor_api: true
@@ -10,6 +10,8 @@ full_access: true
 privileged:
   - SYS_ADMIN
 apparmor: false
+map:
+  - "share:rw"
 init: false
 arch:
   - aarch64

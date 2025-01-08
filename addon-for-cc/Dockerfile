@@ -8,6 +8,7 @@ WORKDIR /app
 RUN pip install requests \
                 paho-mqtt \
                 aiohttp \
+                aiofiles \
                 netifaces \
                 loguru
 

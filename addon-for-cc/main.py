@@ -2,6 +2,7 @@ import asyncio
 import json
 import os
 
+import aiofiles
 import aiohttp
 import netifaces
 from loguru import logger
@@ -10,9 +11,7 @@ from loguru import logger
 HA_URL = "http://supervisor/core"
 HA_TOKEN = os.environ.get("SUPERVISOR_TOKEN")
 # 외부 서버 URL
-EXTERNAL_SERVER_URL = os.environ.get(
-    "EXTERNAL_SERVER_URL", "https://rs-command-crawler.azurewebsites.net"
-)
+EXTERNAL_SERVER_URL = os.environ.get("EXTERNAL_SERVER_URL", "https://rs-command-crawler.azurewebsites.net")
 SYSTEM_MAC_ADDRESS = netifaces.ifaddresses("end0")[netifaces.AF_PACKET][0]["addr"]
 
 # 설정 파일에서 옵션 로드
@@ -104,8 +103,7 @@ def get_changed_states(current_states, previous_states):
     return [
         state
         for state in current_states
-        if state["entity_id"] not in previous_states
-        or state != previous_states[state["entity_id"]]
+        if state["entity_id"] not in previous_states or state != previous_states[state["entity_id"]]
     ]
 
 
@@ -126,9 +124,7 @@ async def send_states_to_external_server(session, data_list):
     url = f"{EXTERNAL_SERVER_URL}/api/v1/command-crawler"
 
     try:
-        async with session.post(
-            url, headers=headers, data=json.dumps(payload), timeout=TIMEOUT
-        ) as response:
+        async with session.post(url, headers=headers, data=json.dumps(payload), timeout=TIMEOUT) as response:
             if response.status == 200:
                 logger.info(f"Data sent successfully for {len(data_list)} entities")
             else:
@@ -147,9 +143,7 @@ async def send_services_to_external_server(session, data_list):
     url = f"{EXTERNAL_SERVER_URL}/api/v1/command-crawler"
 
     try:
-        async with session.post(
-            url, headers=headers, data=json.dumps(payload), timeout=TIMEOUT
-        ) as response:
+        async with session.post(url, headers=headers, data=json.dumps(payload), timeout=TIMEOUT) as response:
             if response.status == 200:
                 logger.info(f"Data sent successfully for {len(data_list)} entities")
             else:
@@ -162,6 +156,49 @@ async def send_services_to_external_server(session, data_list):
         logger.exception(f"Error sending data: {str(e)}")
 
 
+OUTPUT_FILE_PATH = "/share/user_pattern.md"
+
+
+async def fetch_user_patterns():
+    """비동기 방식으로 API를 호출하고 user_patterns 데이터를 가져오는 함수"""
+    async with aiohttp.ClientSession() as session:
+        try:
+            # API 비동기 호출
+            headers = {"x-functions-key": ASSIST_TOKEN, "Content-Type": "application/json"}
+            quoted_mac_address = SYSTEM_MAC_ADDRESS.replace(":", "%3A")
+            request_url = f"{EXTERNAL_SERVER_URL}/api/v1/user-patterns?mac_address={quoted_mac_address}"
+            async with session.get(request_url, headers=headers) as response:
+                response.raise_for_status()  # 오류 발생 시 예외 처리
+                data = await response.json()
+
+                # 성공 상태 확인
+                if data.get("status") != "success":
+                    print("Error: Failed to fetch patterns from API.")
+                    return
+
+                # 패턴 설명만 추출
+                patterns = [item["pattern_description"] for item in data.get("user_patterns", [])]
+
+                # 결과를 비동기적으로 파일에 저장
+                await save_to_file(patterns)
+                print(f"Patterns saved to {OUTPUT_FILE_PATH}")
+
+        except aiohttp.ClientError as e:
+            print(f"API 요청 오류: {e}")
+        except Exception as e:
+            print(f"기타 오류: {e}")
+
+
+async def save_to_file(patterns):
+    """비동기 파일 저장 함수"""
+    try:
+        async with aiofiles.open(OUTPUT_FILE_PATH, "w", encoding="utf-8") as file:
+            for pattern in patterns:
+                await file.write(f"- {pattern}\n")
+    except Exception as e:
+        print(f"파일 저장 오류: {e}")
+
+
 async def main():
     previous_states = {}
     async with aiohttp.ClientSession() as session:
@@ -169,6 +206,7 @@ async def main():
         await send_services_to_external_server(session, await get_services(session))
         while True:
             previous_states = await fetch_and_send_states(session, previous_states)
+            await fetch_user_patterns()
             logger.debug(f"Sleeping for {POLLING_INTERVAL} seconds")
             await asyncio.sleep(POLLING_INTERVAL)
 
@@ -178,4 +216,6 @@ if __name__ == "__main__":
     logger.info(f"Home Assistant API URL: {HA_URL}")
     logger.info(f"External Server URL: {EXTERNAL_SERVER_URL}")
     logger.info(f"Polling Interval: {POLLING_INTERVAL} seconds")
+    asyncio.run(main())
+    asyncio.run(main())
     asyncio.run(main())
