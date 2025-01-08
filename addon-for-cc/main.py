@@ -164,7 +164,7 @@ async def fetch_user_patterns(session):
     try:
         # API 비동기 호출
         headers = {"x-functions-key": ASSIST_TOKEN}
-        quoted_mac_address = SYSTEM_MAC_ADDRESS.replace(":", "%3A")
+        quoted_mac_address = SYSTEM_MAC_ADDRESS.replace(":", "%3A").upper()
         request_url = f"{EXTERNAL_SERVER_URL}/api/v1/user-patterns?mac_address={quoted_mac_address}"
         logger.info(f"Fetching user patterns for {request_url}")
         async with session.get(request_url, headers=headers) as response:
