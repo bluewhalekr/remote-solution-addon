@@ -173,7 +173,7 @@ async def fetch_user_patterns():
 
                 # 성공 상태 확인
                 if data.get("status") != "success":
-                    print("Error: Failed to fetch patterns from API.")
+                    logger.error("Error: Failed to fetch patterns from API.")
                     return
 
                 # 패턴 설명만 추출
@@ -181,12 +181,15 @@ async def fetch_user_patterns():
 
                 # 결과를 비동기적으로 파일에 저장
                 await save_to_file(patterns)
-                print(f"Patterns saved to {OUTPUT_FILE_PATH}")
+                logger.info(f"Patterns saved to {OUTPUT_FILE_PATH}")
+                return True
 
         except aiohttp.ClientError as e:
-            print(f"API 요청 오류: {e}")
+            logger.error(f"API 요청 오류: {e}")
+            return False
         except Exception as e:
-            print(f"기타 오류: {e}")
+            logger.error(f"기타 오류: {e}")
+            return False
 
 
 async def save_to_file(patterns):
@@ -196,7 +199,7 @@ async def save_to_file(patterns):
             for pattern in patterns:
                 await file.write(f"- {pattern}\n")
     except Exception as e:
-        print(f"파일 저장 오류: {e}")
+        logger.error(f"파일 저장 오류: {e}")
 
 
 async def main():
