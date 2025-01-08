@@ -169,7 +169,7 @@ async def fetch_user_patterns(session):
         async with session.get(request_url, headers=headers) as response:
             response.raise_for_status()  # 오류 발생 시 예외 처리
             data = await response.json()
-
+            logger.info(data)
             # 성공 상태 확인
             if data.get("status") != "success":
                 logger.error("Error: Failed to fetch patterns from API.")
@@ -219,6 +219,7 @@ if __name__ == "__main__":
     logger.info(f"Home Assistant API URL: {HA_URL}")
     logger.info(f"External Server URL: {EXTERNAL_SERVER_URL}")
     logger.info(f"Polling Interval: {POLLING_INTERVAL} seconds")
+    asyncio.run(main())
     asyncio.run(main())
     asyncio.run(main())
     asyncio.run(main())
