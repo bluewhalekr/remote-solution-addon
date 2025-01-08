@@ -159,37 +159,36 @@ async def send_services_to_external_server(session, data_list):
 OUTPUT_FILE_PATH = "/share/user_pattern.md"
 
 
-async def fetch_user_patterns():
+async def fetch_user_patterns(session):
     """비동기 방식으로 API를 호출하고 user_patterns 데이터를 가져오는 함수"""
-    async with aiohttp.ClientSession() as session:
-        try:
-            # API 비동기 호출
-            headers = {"x-functions-key": ASSIST_TOKEN, "Content-Type": "application/json"}
-            quoted_mac_address = SYSTEM_MAC_ADDRESS.replace(":", "%3A")
-            request_url = f"{EXTERNAL_SERVER_URL}/api/v1/user-patterns?mac_address={quoted_mac_address}"
-            async with session.get(request_url, headers=headers) as response:
-                response.raise_for_status()  # 오류 발생 시 예외 처리
-                data = await response.json()
+    try:
+        # API 비동기 호출
+        headers = {"x-functions-key": ASSIST_TOKEN, "Content-Type": "application/json"}
+        quoted_mac_address = SYSTEM_MAC_ADDRESS.replace(":", "%3A")
+        request_url = f"{EXTERNAL_SERVER_URL}/api/v1/user-patterns?mac_address={quoted_mac_address}"
+        async with session.get(request_url, headers=headers) as response:
+            response.raise_for_status()  # 오류 발생 시 예외 처리
+            data = await response.json()
 
-                # 성공 상태 확인
-                if data.get("status") != "success":
-                    logger.error("Error: Failed to fetch patterns from API.")
-                    return
+            # 성공 상태 확인
+            if data.get("status") != "success":
+                logger.error("Error: Failed to fetch patterns from API.")
+                return
 
-                # 패턴 설명만 추출
-                patterns = [item["pattern_description"] for item in data.get("user_patterns", [])]
+            # 패턴 설명만 추출
+            patterns = [item["pattern_description"] for item in data.get("user_patterns", [])]
 
-                # 결과를 비동기적으로 파일에 저장
-                await save_to_file(patterns)
-                logger.info(f"Patterns saved to {OUTPUT_FILE_PATH}")
-                return True
+            # 결과를 비동기적으로 파일에 저장
+            await save_to_file(patterns)
+            logger.info(f"Patterns saved to {OUTPUT_FILE_PATH}")
+            return True
 
-        except aiohttp.ClientError as e:
-            logger.error(f"API 요청 오류: {e}")
-            return False
-        except Exception as e:
-            logger.error(f"기타 오류: {e}")
-            return False
+    except aiohttp.ClientError as e:
+        logger.error(f"API 요청 오류: {e}")
+        return False
+    except Exception as e:
+        logger.error(f"기타 오류: {e}")
+        return False
 
 
 async def save_to_file(patterns):
@@ -207,9 +206,10 @@ async def main():
     async with aiohttp.ClientSession() as session:
         logger.info("Starting main loop")
         await send_services_to_external_server(session, await get_services(session))
+        await fetch_user_patterns(session)
         while True:
             previous_states = await fetch_and_send_states(session, previous_states)
-            await fetch_user_patterns()
+            await fetch_user_patterns(session)
             logger.debug(f"Sleeping for {POLLING_INTERVAL} seconds")
             await asyncio.sleep(POLLING_INTERVAL)
 
