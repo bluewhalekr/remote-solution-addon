@@ -207,10 +207,10 @@ async def main():
     async with aiohttp.ClientSession() as session:
         logger.info("Starting main loop")
         await send_services_to_external_server(session, await get_services(session))
-        await fetch_user_patterns(session)
+        # await fetch_user_patterns(session) # specout 검토 후 주석 처리
         while True:
             previous_states = await fetch_and_send_states(session, previous_states)
-            await fetch_user_patterns(session)
+            # await fetch_user_patterns(session) # specout 검토 후 주석 처리
             logger.debug(f"Sleeping for {POLLING_INTERVAL} seconds")
             await asyncio.sleep(POLLING_INTERVAL)
 
